@@ -2,17 +2,15 @@ package com.twentyone.offerguard.offerVendors;
 
 import com.twentyone.offerguard.models.Offer;
 import com.twentyone.offerguard.models.Offer18VendorModel;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import com.twentyone.offerguard.models.OfferResponse;
+import org.springframework.web.client.RestTemplate;
+import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+@Slf4j
 public class Offer18Vendor {
 
 	private static String key = "test1";
@@ -21,28 +19,17 @@ public class Offer18Vendor {
 
 	private static String VENDOR_URL = "https://api.offer18.com/api/af/offers?mid={mid}&aid={aid}&key={key}";
 
-	public static List<Offer> getOffers(Offer18VendorModel offer18VendorModel) throws IOException {
-		List<Offer> offers = new ArrayList<>();
+	public static List<Offer> getOffers(Offer18VendorModel offer18VendorModel) {
 		buildUrl(offer18VendorModel);
-		// TODO
-
-//		try (CloseableHttpClient client = HttpClients.createDefault()) {
-//
-//			HttpGet request = new HttpGet("https://api.offer18.com/api/af/offers?mid=4146&aid=265882&key=adfdccd32ae7efce92c59abe5b27c510&authorized=1");
-//
-//			CloseableHttpResponse response =  client.execute(request);
-//			System.out.println(response.getProtocolVersion());              // HTTP/1.1
-//			System.out.println(response.getStatusLine().getStatusCode());   // 200
-//			System.out.println(response.getStatusLine().getReasonPhrase()); // OK
-//			System.out.println(response.getStatusLine().toString());        // HTTP/1.1 200 OK
-//
-//			HttpEntity entity = response.getEntity();
-//			if (entity != null) {
-//				String responseString = EntityUtils.toString(entity);
-//				System.out.println(responseString);
-//				System.out.println(entity.getContent().);
-//			}
-//		}
+		RestTemplate restTemplate = new RestTemplate();
+		OfferResponse offerResponse = restTemplate.getForObject("https://api.offer18.com/api/af/offers?mid=4146&aid=265882&key=adfdccd32ae7efce92c59abe5b27c510", OfferResponse.class);
+		log.info("value:: {}", offerResponse.getData());
+		Map<String, Offer> data = offerResponse.getData();
+		List<Offer> offers = new ArrayList<>(data.values());
+		log.info("value:: {}", offers);
+		offers.forEach((t) -> {
+			System.out.println(t.getName());
+		});
 		return offers;
 	}
 
