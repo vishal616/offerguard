@@ -38,8 +38,6 @@ public class Offer18Vendor {
 		OfferResponse offerResponse = restTemplate.getForObject("https://api.offer18.com/api/af/offers?mid=4146&aid=265882&key=adfdccd32ae7efce92c59abe5b27c510", OfferResponse.class);
 		Map<String, Offer> data = offerResponse.getData();
 		List<Offer> offers = new ArrayList<>(data.values());
-
-		System.out.println(offers.get(0));
 		offers.forEach((t) -> {
 			try {
 				offerService.save(t);

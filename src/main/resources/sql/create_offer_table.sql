@@ -1,0 +1,27 @@
+CREATE TABLE IF NOT EXISTS public.offers
+(
+	id character varying(50) COLLATE pg_catalog."default" NOT NULL,
+	name character varying(500) COLLATE pg_catalog."default" NOT NULL,
+	status character varying(50) COLLATE pg_catalog."default" NOT NULL,
+	category character varying(50) COLLATE pg_catalog."default",
+	currency character varying(20) COLLATE pg_catalog."default",
+	price character varying(200) COLLATE pg_catalog."default",
+	model character varying(20) COLLATE pg_catalog."default",
+	start_date character varying(30) COLLATE pg_catalog."default",
+	end_date character varying(30) COLLATE pg_catalog."default",
+	preview_url character varying(1000) COLLATE pg_catalog."default",
+	country_allowed character varying(1000) COLLATE pg_catalog."default",
+	country_blocked character varying(1000) COLLATE pg_catalog."default",
+	city_allowed character varying(1000) COLLATE pg_catalog."default",
+	city_blocked character varying(1000) COLLATE pg_catalog."default",
+	os_allowed character varying(50) COLLATE pg_catalog."default",
+	os_blocked character varying(50) COLLATE pg_catalog."default",
+	device_allowed character varying(50) COLLATE pg_catalog."default",
+	device_blocked character varying(50) COLLATE pg_catalog."default",
+	isp_allowed character varying(50) COLLATE pg_catalog."default",
+	isp_blocked character varying(50) COLLATE pg_catalog."default",
+	click_url character varying(1000) COLLATE pg_catalog."default",
+	impression_url character varying(1000) COLLATE pg_catalog."default",
+	redirects character varying(10) COLLATE pg_catalog."default",
+	CONSTRAINT offers_pkey PRIMARY KEY (id)
+)
