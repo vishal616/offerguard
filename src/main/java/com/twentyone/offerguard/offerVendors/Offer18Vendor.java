@@ -3,32 +3,49 @@ package com.twentyone.offerguard.offerVendors;
 import com.twentyone.offerguard.models.Offer;
 import com.twentyone.offerguard.models.Offer18VendorModel;
 import com.twentyone.offerguard.models.OfferResponse;
+import com.twentyone.offerguard.repositories.OfferRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 @Slf4j
+@Component
 public class Offer18Vendor {
+
+	@Autowired
+	private OfferRepository offerRepository;
 
 	private static String key = "test1";
 	private static String aid = "test2";
 	private static String mid = "test3";
-
 	private static String VENDOR_URL = "https://api.offer18.com/api/af/offers?mid={mid}&aid={aid}&key={key}";
+	private static OfferRepository offerService;
+
+	@PostConstruct
+	public void init() {
+		this.offerService = offerRepository;
+	}
 
 	public static List<Offer> getOffers(Offer18VendorModel offer18VendorModel) {
 		buildUrl(offer18VendorModel);
 		RestTemplate restTemplate = new RestTemplate();
 		OfferResponse offerResponse = restTemplate.getForObject("https://api.offer18.com/api/af/offers?mid=4146&aid=265882&key=adfdccd32ae7efce92c59abe5b27c510", OfferResponse.class);
-		log.info("value:: {}", offerResponse.getData());
 		Map<String, Offer> data = offerResponse.getData();
 		List<Offer> offers = new ArrayList<>(data.values());
-		log.info("value:: {}", offers);
+
+		System.out.println(offers.get(0));
 		offers.forEach((t) -> {
-			System.out.println(t.getName());
+			try {
+				offerService.save(t);
+			} catch (Exception e) {
+				System.out.println(t);
+			}
 		});
 		return offers;
 	}
