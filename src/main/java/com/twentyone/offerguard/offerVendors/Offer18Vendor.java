@@ -5,6 +5,7 @@ import com.twentyone.offerguard.models.Offer18VendorModel;
 import com.twentyone.offerguard.models.Offer18Response;
 import com.twentyone.offerguard.repositories.OfferRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -32,6 +33,11 @@ public class Offer18Vendor {
 	@PostConstruct
 	public void init() {
 		this.offerService = offerRepository;
+	}
+
+	@Scheduled(cron = "0 */2 * ? * *")
+	public void startOffer18Job() {
+		log.info("offer 18 job running");
 	}
 
 	public static List<Offer> getOffers(Offer18VendorModel offer18VendorModel) {
