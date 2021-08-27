@@ -2,14 +2,16 @@ package com.twentyone.offerguard.offerVendors;
 
 import com.twentyone.offerguard.models.Offer;
 import com.twentyone.offerguard.models.Offer18VendorModel;
-import com.twentyone.offerguard.models.OfferResponse;
+import com.twentyone.offerguard.models.Offer18Response;
 import com.twentyone.offerguard.repositories.OfferRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.PostConstruct;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,23 +35,48 @@ public class Offer18Vendor {
 	}
 
 	public static List<Offer> getOffers(Offer18VendorModel offer18VendorModel) {
-		buildUrl(offer18VendorModel);
+		log.info("get offers call started");
+		String apiUrl = buildUrl(offer18VendorModel);
+		apiUrl = "https://api.offer18.com/api/af/offers?mid=4146&aid=265882&key=adfdccd32ae7efce92c59abe5b27c510";
 		RestTemplate restTemplate = new RestTemplate();
-		OfferResponse offerResponse = restTemplate.getForObject("https://api.offer18.com/api/af/offers?mid=4146&aid=265882&key=adfdccd32ae7efce92c59abe5b27c510", OfferResponse.class);
-		Map<String, Offer> data = offerResponse.getData();
-		List<Offer> offers = new ArrayList<>(data.values());
-		offers.forEach((t) -> {
-			try {
-				offerService.save(t);
-			} catch (Exception e) {
-				System.out.println(t);
-			}
-		});
+		Offer18Response offer18Response = null;
+		List<Offer> offers = null;
+		try {
+			log.info("calling api");
+			offer18Response = restTemplate.getForObject(apiUrl, Offer18Response.class);
+			log.info("api response:: {}", offer18Response.getResponse());
+
+			Map<String, Offer> data = offer18Response.getData();
+			offers = new ArrayList<>(data.values());
+
+			updateOffers(offers);
+		} catch (HttpServerErrorException e) {
+			log.error("api call failed:: {}", e);
+		} catch (SQLException e) {
+			log.error("database offer table update failed:: {}", e);
+		}
 		return offers;
+	}
+
+	private static void updateOffers(List<Offer> offerList) throws SQLException {
+		try {
+			log.info("started deleting entries in offer table");
+			offerService.deleteAll();
+			log.info("delete successful");
+
+			log.info("started saving new entries in offer table");
+			offerService.saveAll(offerList);
+			log.info("saving successful");
+
+		} catch (Exception e) {
+			log.error("Error in updating database:: {}", e);
+			throw new SQLException(e);
+		}
 	}
 
 	private static String buildUrl(Offer18VendorModel offer18VendorModel) {
 		String newUrl = VENDOR_URL;
+		log.info("building url with vendor url as :: {}", newUrl);
 		newUrl = newUrl.replace("{mid}", mid).replace("{aid}", aid).replace("{key}", key);
 
 		if (offer18VendorModel.getAuthorized() != null ) {
@@ -70,7 +97,7 @@ public class Offer18Vendor {
 		if (offer18VendorModel.getPage() != null ) {
 			newUrl = newUrl + "&page=" + offer18VendorModel.getPage();
 		}
-
+		log.info("url built successfully");
 		return newUrl;
 	}
 }

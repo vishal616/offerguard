@@ -10,7 +10,7 @@ import java.util.Map;
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OfferResponse {
+public class Offer18Response {
 
 	private String response;
 	private Map<String, Offer> data;

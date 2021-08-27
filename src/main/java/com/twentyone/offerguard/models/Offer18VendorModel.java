@@ -1,13 +1,11 @@
 package com.twentyone.offerguard.models;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class Offer18VendorModel {
 
 	private String page = null;
