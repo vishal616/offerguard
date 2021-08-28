@@ -19,7 +19,7 @@ public class OfferguardApplication {
 
 //        Offer18Vendor.getOffers(offer18VendorModel);
 
-        MoBrandVendor.getAffiliateStatusForOffers();
+//        MoBrandVendor.getAffiliateStatusForOffers();
 	}
 
 }
