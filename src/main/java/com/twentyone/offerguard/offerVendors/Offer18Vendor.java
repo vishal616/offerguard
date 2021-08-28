@@ -35,7 +35,7 @@ public class Offer18Vendor {
 		this.offerService = offerRepository;
 	}
 
-	@Scheduled(cron = "0 */2 * ? * *")
+//	@Scheduled(cron = "0 */2 * ? * *")
 	public void startOffer18Job() {
 		log.info("offer 18 job running");
 	}
@@ -43,7 +43,7 @@ public class Offer18Vendor {
 	public static List<Offer> getOffers(Offer18VendorModel offer18VendorModel) {
 		log.info("get offers call started");
 		String apiUrl = buildUrl(offer18VendorModel);
-		apiUrl = "https://api.offer18.com/api/af/offers?mid=4146&aid=265882&key=adfdccd32ae7efce92c59abe5b27c510";
+		apiUrl = "https://api.offer18.com/api/af/offers?mid=4146&aid=265882&key=adfdccd32ae7efce92c59abe5b27c510&authorized=1";
 		RestTemplate restTemplate = new RestTemplate();
 		Offer18Response offer18Response = null;
 		List<Offer> offers = null;

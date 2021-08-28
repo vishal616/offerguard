@@ -16,7 +16,7 @@ public class OfferguardApplication {
 
         Offer18VendorModel offer18VendorModel = new Offer18VendorModel();
 
-//        Offer18Vendor.getOffers(offer18VendorModel);
+        Offer18Vendor.getOffers(offer18VendorModel);
 
     }
 

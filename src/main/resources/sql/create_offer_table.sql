@@ -23,5 +23,6 @@ CREATE TABLE IF NOT EXISTS public.offers
 	click_url character varying(1000) COLLATE pg_catalog."default",
 	impression_url character varying(1000) COLLATE pg_catalog."default",
 	redirects character varying(10) COLLATE pg_catalog."default",
+	affiliate_status character varying(20) COLLATE pg_catalog."default",
 	CONSTRAINT offers_pkey PRIMARY KEY (id)
 )

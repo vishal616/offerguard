@@ -85,4 +85,6 @@ public class Offer {
 
 	private String redirects;
 
+	private String affiliateStatus;
+
 }

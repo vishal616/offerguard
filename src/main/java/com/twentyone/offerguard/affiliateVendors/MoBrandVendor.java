@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class MoBrandVendor {
 
-	@Scheduled(cron = "0 */3 * ? * *")
+//	@Scheduled(cron = "0 */3 * ? * *")
 	public static void startMoBrandJob() {
 		log.info("mo brand job running");
 	}
