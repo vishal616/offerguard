@@ -16,7 +16,7 @@ public class OfferguardApplication {
 		SpringApplication.run(OfferguardApplication.class, args);
 
 //        Offer18VendorModel offer18VendorModel = new Offer18VendorModel();
-
+//
 //        Offer18Vendor.getOffers(offer18VendorModel);
 
 //        MoBrandVendor.getAffiliateStatusForOffers();

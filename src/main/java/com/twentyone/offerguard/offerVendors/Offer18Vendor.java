@@ -24,10 +24,12 @@ public class Offer18Vendor {
 	@Autowired
 	private OfferRepository offerRepository;
 
-	private static String key = "test1";
-	private static String aid = "test2";
-	private static String mid = "test3";
+	private static String key = "adfdccd32ae7efce92c59abe5b27c510";
+	private static String aid = "265882";
+	private static String mid = "4146";
 	private static String VENDOR_URL = "https://api.offer18.com/api/af/offers?mid={mid}&aid={aid}&key={key}";
+	private static String ANDROID_DEVICE_KEY = "c6aee72f-72d8-4a71-ad7a-742acfd35a60";
+	private static String IOS_DEVICE_KEY = "97F0C91E-946E-449A-B722-BCE6BF5451A9";
 	private static OfferRepository offerService;
 
 	@PostConstruct
@@ -35,15 +37,16 @@ public class Offer18Vendor {
 		this.offerService = offerRepository;
 	}
 
-//	@Scheduled(cron = "0 */2 * ? * *")
+//	@Scheduled(cron = "0 */1 * ? * *")
 	public void startOffer18Job() {
-		log.info("offer 18 job running");
+		log.info("Execution of offer 18 job started");
+		Offer18VendorModel offer18VendorModel = new Offer18VendorModel(null,null,null,"1","1",null);
+		getOffers(offer18VendorModel);
 	}
 
 	public static List<Offer> getOffers(Offer18VendorModel offer18VendorModel) {
 		log.info("get offers call started");
 		String apiUrl = buildUrl(offer18VendorModel);
-		apiUrl = "https://api.offer18.com/api/af/offers?mid=4146&aid=265882&key=adfdccd32ae7efce92c59abe5b27c510&authorized=1";
 		RestTemplate restTemplate = new RestTemplate();
 		Offer18Response offer18Response = null;
 		List<Offer> offers = null;
@@ -54,11 +57,21 @@ public class Offer18Vendor {
 
 			Map<String, Offer> data = offer18Response.getData();
 			offers = new ArrayList<>(data.values());
-
+			offers.forEach((offer -> {
+				String operatingSystem = offer.getOsAllowed();
+				String osAppender = null;
+				if(operatingSystem.contains("android")) {
+					osAppender = "&googleaid="+ANDROID_DEVICE_KEY;
+				} else {
+					osAppender = "&iosidfa="+IOS_DEVICE_KEY;
+				}
+				offer.setClickUrl(offer.getClickUrl() + osAppender);
+			}));
 			updateOffers(offers);
 		} catch (HttpServerErrorException e) {
 			log.error("api call failed:: {}", e);
-		} catch (SQLException e) {
+		}
+		catch (SQLException e) {
 			log.error("database offer table update failed:: {}", e);
 		}
 		return offers;
@@ -103,7 +116,10 @@ public class Offer18Vendor {
 		if (offer18VendorModel.getPage() != null ) {
 			newUrl = newUrl + "&page=" + offer18VendorModel.getPage();
 		}
-		log.info("url built successfully");
+		newUrl = newUrl + "&i=1";
+
+		log.info("url built successfully:: {}", newUrl);
+
 		return newUrl;
 	}
 }

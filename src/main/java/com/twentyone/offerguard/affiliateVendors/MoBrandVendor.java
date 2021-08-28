@@ -14,7 +14,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
@@ -43,9 +43,10 @@ public class MoBrandVendor {
 		httpHeaders = buildHeaders();
 	}
 
-//	@Scheduled(cron = "0 */3 * ? * *")
+//	@Scheduled(cron = "0 */1 * ? * *")
 	public static void startMoBrandJob() {
-		log.info("mo brand job running");
+		log.info("Execution of mo brand affiliate link check job started");
+		getAffiliateStatusForOffers();
 	}
 
 	public static void getAffiliateStatusForOffers() {
@@ -56,12 +57,20 @@ public class MoBrandVendor {
 		log.info("total offers: {}", offerList.size());
 
 		offerList.forEach((offer -> {
-			callMoBrand(offer);
+			try {
+				if(allowOffer(offer)) {
+					callMoBrand(offer);
+				}
+			} catch (RestClientException e) {
+				log.error("Error in calling mo brand rest api:: {}", e);
+			} catch (SQLException e) {
+				log.error("Error in updating the offer:: {}", e);
+			}
 		}));
 
 	}
 
-	private static void callMoBrand(Offer offer) {
+	private static void callMoBrand(Offer offer) throws RestClientException, SQLException {
 		log.info("calling mo brand api for offer:: {}", offer.getName());
 
 		MultiValueMap<String, String> requestBody = buildPayloadMap(offer);
@@ -71,8 +80,8 @@ public class MoBrandVendor {
 
 		try {
 			response = restTemplate.exchange("https://api.offertest.net/offertest", HttpMethod.POST, requestEntity, MoBrandResponse.class);
-		} catch (HttpClientErrorException e) {
-			log.error("api called failed for mobrand:: {}", e);
+		} catch (RestClientException e) {
+			throw new RestClientException("api called failed for mobrand");
 		}
 
 		log.info("response code:: {}", response.getStatusCode());
@@ -86,7 +95,7 @@ public class MoBrandVendor {
 		try {
 			updateOfferStatus(offer);
 		} catch (SQLException e) {
-			log.error("Error in updating the offer:: {}", e);
+			throw new SQLException(e);
 		}
 
 	}
@@ -123,5 +132,18 @@ public class MoBrandVendor {
 		requestBody.add("url", offer.getClickUrl());
 		requestBody.add("platform", offer.getOsAllowed());
 		return requestBody;
+	}
+
+	private static boolean allowOffer(Offer offer) {
+		if(offer.getClickUrl() == null || offer.getClickUrl() == "") {
+			return false;
+		}
+		if(offer.getOsAllowed() == null || offer.getOsAllowed() == "") {
+			return false;
+		}
+		if(offer.getCountryAllowed() == null || offer.getCountryAllowed() == "") {
+			return false;
+		}
+		return true;
 	}
 }
