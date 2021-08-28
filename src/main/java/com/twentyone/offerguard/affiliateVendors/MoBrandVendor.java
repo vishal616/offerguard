@@ -33,10 +33,14 @@ public class MoBrandVendor {
 	private static String USER_ID = "Mo4Ie4WqQ_-ibPgfqnFaLA";
 
 	private static OfferRepository offerService;
+	private static RestTemplate restTemplate;
+	private static HttpHeaders httpHeaders;
 
 	@PostConstruct
 	public void init() {
 		this.offerService = offerRepository;
+		restTemplate = buildRestTemplate();
+		httpHeaders = buildHeaders();
 	}
 
 //	@Scheduled(cron = "0 */3 * ? * *")
@@ -59,23 +63,10 @@ public class MoBrandVendor {
 
 	private static void callMoBrand(Offer offer) {
 		log.info("calling mo brand api for offer:: {}", offer.getName());
-		RestTemplate restTemplate = new RestTemplateBuilder()
-				.messageConverters(
-						new MappingJackson2HttpMessageConverter(new ObjectMapper()),
-						new FormHttpMessageConverter())
-				.build();
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.set("Authorization", "Bearer " + token);
-		headers.setContentType(MediaType.APPLICATION_JSON);
+		MultiValueMap<String, String> requestBody = buildPayloadMap(offer);
 
-		MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-		requestBody.add("userid", USER_ID);
-		requestBody.add("country", offer.getCountryAllowed().toLowerCase());
-		requestBody.add("url", offer.getClickUrl());
-		requestBody.add("platform", offer.getOsAllowed());
-
-		HttpEntity requestEntity = new HttpEntity<>(requestBody.toSingleValueMap(), headers);
+		HttpEntity requestEntity = new HttpEntity<>(requestBody.toSingleValueMap(), httpHeaders);
 		ResponseEntity<MoBrandResponse> response = null;
 
 		try {
@@ -108,5 +99,29 @@ public class MoBrandVendor {
 		} catch (Exception e) {
 			throw new SQLException(e);
 		}
+	}
+
+	private static RestTemplate buildRestTemplate() {
+		return new RestTemplateBuilder()
+				.messageConverters(
+						new MappingJackson2HttpMessageConverter(new ObjectMapper()),
+						new FormHttpMessageConverter())
+				.build();
+	}
+
+	private static HttpHeaders buildHeaders() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", "Bearer " + token);
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		return headers;
+	}
+
+	private static MultiValueMap<String, String> buildPayloadMap(Offer offer) {
+		MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+		requestBody.add("userid", USER_ID);
+		requestBody.add("country", offer.getCountryAllowed().toLowerCase());
+		requestBody.add("url", offer.getClickUrl());
+		requestBody.add("platform", offer.getOsAllowed());
+		return requestBody;
 	}
 }
