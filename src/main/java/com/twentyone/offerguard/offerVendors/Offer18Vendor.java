@@ -42,6 +42,7 @@ public class Offer18Vendor {
 		log.info("Execution of offer 18 job started");
 		Offer18VendorModel offer18VendorModel = new Offer18VendorModel(null,null,null,"1","1",null);
 		getOffers(offer18VendorModel);
+		log.info("Execution of offer 18 job finished");
 	}
 
 	public static List<Offer> getOffers(Offer18VendorModel offer18VendorModel) {

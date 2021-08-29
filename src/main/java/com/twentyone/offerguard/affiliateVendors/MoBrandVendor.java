@@ -47,6 +47,7 @@ public class MoBrandVendor {
 	public static void startMoBrandJob() {
 		log.info("Execution of mo brand affiliate link check job started");
 		getAffiliateStatusForOffers();
+		log.info("Execution of mo brand affiliate link check job finished");
 	}
 
 	public static void getAffiliateStatusForOffers() {
@@ -67,7 +68,6 @@ public class MoBrandVendor {
 				log.error("Error in updating the offer:: {}", e);
 			}
 		}));
-
 	}
 
 	private static void callMoBrand(Offer offer) throws RestClientException, SQLException {
@@ -87,10 +87,17 @@ public class MoBrandVendor {
 		log.info("response code:: {}", response.getStatusCode());
 
 		MoBrandResponse moBrandResponse = response.getBody();
-		log.info("offer status for {} is {}", offer.getName(), moBrandResponse.getStatus());
 
 		offer.setRedirects(moBrandResponse.getRedirects());
-		offer.setAffiliateStatus(moBrandResponse.getStatus());
+
+		String bundleIdMatch = moBrandResponse.getBundleIdMatch();
+		if(bundleIdMatch.equalsIgnoreCase("true")) {
+			offer.setAffiliateStatus("SUCCESS");
+		} else {
+			offer.setAffiliateStatus("FAILED");
+		}
+
+		log.info("offer status for {} is {}", offer.getName(), offer.getAffiliateStatus());
 
 		try {
 			updateOfferStatus(offer);
@@ -126,12 +133,30 @@ public class MoBrandVendor {
 	}
 
 	private static MultiValueMap<String, String> buildPayloadMap(Offer offer) {
+		log.info("building payload for api call");
 		MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
 		requestBody.add("userid", USER_ID);
 		requestBody.add("country", offer.getCountryAllowed().toLowerCase());
 		requestBody.add("url", offer.getClickUrl());
 		requestBody.add("platform", offer.getOsAllowed());
+		requestBody.add("expectedBundleId", getBundleId(offer.getPreviewUrl(), offer.getOsAllowed()));
+		log.info("payload built successful");
 		return requestBody;
+	}
+
+	private static String getBundleId(String previewUrl, String os) {
+		log.info("building bundle id for payload");
+		String bundleId = null;
+		if (os.contains("android")) {
+			int lastEqualCharPos = previewUrl.lastIndexOf('=');
+			bundleId = previewUrl.substring(lastEqualCharPos + 1);
+		} else {
+			int lastForwardSlashCharPos = previewUrl.lastIndexOf('/');
+			int lastQuestionCharPos = previewUrl.lastIndexOf('?');
+			bundleId = previewUrl.substring(lastForwardSlashCharPos+1,lastQuestionCharPos);
+		}
+		log.info("bundle id for preview url :: {} is {}", previewUrl, bundleId);
+		return bundleId;
 	}
 
 	private static boolean allowOffer(Offer offer) {
