@@ -66,25 +66,32 @@ public class MoBrandVendor {
 				log.error("Error in calling mo brand rest api:: {}", e);
 			} catch (SQLException e) {
 				log.error("Error in updating the offer:: {}", e);
+			} catch (StringIndexOutOfBoundsException e) {
+				log.error("Error occurred during bundle id extraction");
 			}
 		}));
 	}
 
-	private static void callMoBrand(Offer offer) throws RestClientException, SQLException {
+	private static void callMoBrand(Offer offer) throws RestClientException, SQLException, StringIndexOutOfBoundsException {
 		log.info("calling mo brand api for offer:: {}", offer.getName());
 
-		MultiValueMap<String, String> requestBody = buildPayloadMap(offer);
+		MultiValueMap<String, String> requestBody = null;
+		try {
+			requestBody = buildPayloadMap(offer);
+		} catch (StringIndexOutOfBoundsException e) {
+			throw new StringIndexOutOfBoundsException();
+		}
 
 		HttpEntity requestEntity = new HttpEntity<>(requestBody.toSingleValueMap(), httpHeaders);
 		ResponseEntity<MoBrandResponse> response = null;
 
 		try {
+			log.info("waiting for the api response");
 			response = restTemplate.exchange("https://api.offertest.net/offertest", HttpMethod.POST, requestEntity, MoBrandResponse.class);
+			log.info("response code:: {}", response.getStatusCode());
 		} catch (RestClientException e) {
-			throw new RestClientException("api called failed for mobrand");
+			throw new RestClientException("api call failed for mo brand");
 		}
-
-		log.info("response code:: {}", response.getStatusCode());
 
 		MoBrandResponse moBrandResponse = response.getBody();
 
@@ -132,41 +139,59 @@ public class MoBrandVendor {
 		return headers;
 	}
 
-	private static MultiValueMap<String, String> buildPayloadMap(Offer offer) {
+	private static MultiValueMap<String, String> buildPayloadMap(Offer offer) throws StringIndexOutOfBoundsException {
 		log.info("building payload for api call");
 		MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-		requestBody.add("userid", USER_ID);
-		requestBody.add("country", offer.getCountryAllowed().toLowerCase());
-		requestBody.add("url", offer.getClickUrl());
-		requestBody.add("platform", offer.getOsAllowed());
-		requestBody.add("expectedBundleId", getBundleId(offer.getPreviewUrl(), offer.getOsAllowed()));
-		log.info("payload built successful");
+		try {
+			requestBody.add("userid", USER_ID);
+			requestBody.add("country", offer.getCountryAllowed().toLowerCase());
+			requestBody.add("url", offer.getClickUrl());
+			requestBody.add("platform", offer.getOsAllowed());
+			requestBody.add("expectedBundleId", getBundleId(offer.getPreviewUrl(), offer.getOsAllowed()));
+			log.info("payload built successful");
+		} catch (StringIndexOutOfBoundsException e) {
+			throw new StringIndexOutOfBoundsException();
+		}
 		return requestBody;
 	}
 
-	private static String getBundleId(String previewUrl, String os) {
+	private static String getBundleId(String previewUrl, String os) throws StringIndexOutOfBoundsException {
 		log.info("building bundle id for payload");
 		String bundleId = null;
-		if (os.contains("android")) {
-			int lastEqualCharPos = previewUrl.lastIndexOf('=');
-			bundleId = previewUrl.substring(lastEqualCharPos + 1);
-		} else {
-			int lastForwardSlashCharPos = previewUrl.lastIndexOf('/');
-			int lastQuestionCharPos = previewUrl.lastIndexOf('?');
-			bundleId = previewUrl.substring(lastForwardSlashCharPos+1,lastQuestionCharPos);
+		try {
+			if (os.contains("android")) {
+				int firstEqualCharPos = previewUrl.indexOf('=');
+				int firstQuestionCharPosAfterLastEqual = previewUrl.indexOf('&', firstEqualCharPos);
+				if(firstQuestionCharPosAfterLastEqual == -1) {
+					bundleId = previewUrl.substring(firstEqualCharPos + 1);
+				} else {
+					bundleId = previewUrl.substring(firstEqualCharPos + 1, firstQuestionCharPosAfterLastEqual);
+				}
+			} else {
+				int lastForwardSlashCharPos = previewUrl.lastIndexOf('/');
+				int lastQuestionCharPos = previewUrl.lastIndexOf('?');
+				if(lastQuestionCharPos == -1) {
+					bundleId = previewUrl.substring(lastForwardSlashCharPos+1);
+				} else {
+					bundleId = previewUrl.substring(lastForwardSlashCharPos+1,lastQuestionCharPos);
+				}
+
+			}
+		} catch (StringIndexOutOfBoundsException e) {
+			throw new StringIndexOutOfBoundsException();
 		}
 		log.info("bundle id for preview url :: {} is {}", previewUrl, bundleId);
 		return bundleId;
 	}
 
 	private static boolean allowOffer(Offer offer) {
-		if(offer.getClickUrl() == null || offer.getClickUrl() == "") {
+		if(offer.getClickUrl() == null || offer.getClickUrl().length() == 0) {
 			return false;
 		}
-		if(offer.getOsAllowed() == null || offer.getOsAllowed() == "") {
+		if(offer.getOsAllowed() == null || offer.getOsAllowed().length() == 0) {
 			return false;
 		}
-		if(offer.getCountryAllowed() == null || offer.getCountryAllowed() == "") {
+		if(offer.getCountryAllowed() == null || offer.getCountryAllowed().length() == 0) {
 			return false;
 		}
 		return true;
