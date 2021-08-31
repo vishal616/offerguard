@@ -46,7 +46,7 @@ public class MoBrandVendor {
 	@PostConstruct
 	public void init() {
 		this.offerService = offerRepository;
-		this.redirectUrlRepository = redirectUrlRepository;
+		this.redirectUrlService = redirectUrlRepository;
 		restTemplate = buildRestTemplate();
 		httpHeaders = buildHeaders();
 	}
