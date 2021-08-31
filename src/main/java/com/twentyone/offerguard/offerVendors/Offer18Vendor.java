@@ -4,6 +4,7 @@ import com.twentyone.offerguard.models.Offer;
 import com.twentyone.offerguard.models.Offer18VendorModel;
 import com.twentyone.offerguard.models.Offer18Response;
 import com.twentyone.offerguard.repositories.OfferRepository;
+import com.twentyone.offerguard.repositories.RedirectUrlRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,9 @@ public class Offer18Vendor {
 	@Autowired
 	private OfferRepository offerRepository;
 
+	@Autowired
+	private RedirectUrlRepository redirectUrlRepository;
+
 	private static String key = "adfdccd32ae7efce92c59abe5b27c510";
 	private static String aid = "265882";
 	private static String mid = "4146";
@@ -31,10 +35,12 @@ public class Offer18Vendor {
 	private static String ANDROID_DEVICE_KEY = "c6aee72f-72d8-4a71-ad7a-742acfd35a60";
 	private static String IOS_DEVICE_KEY = "97F0C91E-946E-449A-B722-BCE6BF5451A9";
 	private static OfferRepository offerService;
+	private static RedirectUrlRepository redirectUrlService;
 
 	@PostConstruct
 	public void init() {
 		this.offerService = offerRepository;
+		this.redirectUrlService = redirectUrlRepository;
 	}
 
 //	@Scheduled(cron = "0 */1 * ? * *")
@@ -80,6 +86,11 @@ public class Offer18Vendor {
 
 	private static void updateOffers(List<Offer> offerList) throws SQLException {
 		try {
+
+			log.info("started deleting entries in redirect urls table");
+			redirectUrlService.deleteAll();
+			log.info("delete successful");
+
 			log.info("started deleting entries in offer table");
 			offerService.deleteAll();
 			log.info("delete successful");

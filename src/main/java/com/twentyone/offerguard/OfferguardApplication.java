@@ -14,10 +14,10 @@ public class OfferguardApplication {
 	public static void main(String[] args) {
 
 		SpringApplication.run(OfferguardApplication.class, args);
-		Offer18VendorModel offer18VendorModel = new Offer18VendorModel(null,null,null,"1","1",null);
-        Offer18Vendor.getOffers(offer18VendorModel);
+//		Offer18VendorModel offer18VendorModel = new Offer18VendorModel(null,null,null,"1","1",null);
+//        Offer18Vendor.getOffers(offer18VendorModel);
 
-//        MoBrandVendor.getAffiliateStatusForOffers();
+        MoBrandVendor.getAffiliateStatusForOffers();
 	}
 
 }

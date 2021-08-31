@@ -3,7 +3,9 @@ package com.twentyone.offerguard.affiliateVendors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.twentyone.offerguard.models.MoBrandResponse;
 import com.twentyone.offerguard.models.Offer;
+import com.twentyone.offerguard.models.RedirectUrl;
 import com.twentyone.offerguard.repositories.OfferRepository;
+import com.twentyone.offerguard.repositories.RedirectUrlRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -20,6 +22,7 @@ import org.springframework.web.client.RestTemplate;
 import javax.annotation.PostConstruct;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -29,16 +32,21 @@ public class MoBrandVendor {
 	@Autowired
 	private OfferRepository offerRepository;
 
+	@Autowired
+	private RedirectUrlRepository redirectUrlRepository;
+
 	private static String token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJNbzRJZTRXcVFfLWliUGdmcW5GYUxBIiwiaWF0IjoxNjI5NzI5MDkwLCJqdGkiOiIzOUswaVNsRDZ2Q1V1MnFZRVFrRnp3In0.L8oxEDtbzebbuM6l3dMI-BkCQKGNWVGMsWh_jYiJaE0";
 	private static String USER_ID = "Mo4Ie4WqQ_-ibPgfqnFaLA";
 
 	private static OfferRepository offerService;
+	private static RedirectUrlRepository redirectUrlService;
 	private static RestTemplate restTemplate;
 	private static HttpHeaders httpHeaders;
 
 	@PostConstruct
 	public void init() {
 		this.offerService = offerRepository;
+		this.redirectUrlRepository = redirectUrlRepository;
 		restTemplate = buildRestTemplate();
 		httpHeaders = buildHeaders();
 	}
@@ -104,10 +112,13 @@ public class MoBrandVendor {
 			offer.setAffiliateStatus("FAILED");
 		}
 
+		List<RedirectUrl> redirectUrlList = moBrandResponse.getUrls().stream().map((moBrandUrl -> new RedirectUrl(offer.getId(), moBrandUrl.getUrl()))).collect(Collectors.toList());
+
 		log.info("offer status for {} is {}", offer.getName(), offer.getAffiliateStatus());
 
 		try {
 			updateOfferStatus(offer);
+			addRedirectUrls(redirectUrlList);
 		} catch (SQLException e) {
 			throw new SQLException(e);
 		}
@@ -119,6 +130,16 @@ public class MoBrandVendor {
 			log.info("going to update offer in database");
 			offerService.save(offer);
 			log.info("offer updated successfully");
+		} catch (Exception e) {
+			throw new SQLException(e);
+		}
+	}
+
+	private static void addRedirectUrls(List<RedirectUrl> redirectUrlList) throws SQLException {
+		try {
+			log.info("going to add redirects urls in database");
+			redirectUrlService.saveAll(redirectUrlList);
+			log.info("redirect urls updated successfully");
 		} catch (Exception e) {
 			throw new SQLException(e);
 		}
