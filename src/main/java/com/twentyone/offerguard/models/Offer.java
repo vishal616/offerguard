@@ -8,6 +8,7 @@ import lombok.Setter;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Getter
 @Setter
@@ -50,7 +51,7 @@ public class Offer {
 	@JsonProperty("country_allow")
 	private String countryAllowed;
 
-	@JsonProperty("country_blocked")
+	@JsonProperty("country_block")
 	private String countryBlocked;
 
 	@JsonProperty("city_allow")
@@ -86,5 +87,8 @@ public class Offer {
 	private String redirects;
 
 	private String affiliateStatus;
+
+	@Transient
+	private String mobileMarketingPlatforms;
 
 }
