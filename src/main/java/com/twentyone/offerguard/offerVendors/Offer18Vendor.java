@@ -6,6 +6,7 @@ import com.twentyone.offerguard.models.Offer18Response;
 import com.twentyone.offerguard.repositories.OfferRepository;
 import com.twentyone.offerguard.repositories.RedirectUrlRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpServerErrorException;
@@ -28,12 +29,18 @@ public class Offer18Vendor {
 	@Autowired
 	private RedirectUrlRepository redirectUrlRepository;
 
-	private static String key = "adfdccd32ae7efce92c59abe5b27c510";
-	private static String aid = "265882";
-	private static String mid = "4146";
+	@Value("${offer.guard.offer18.key}")
+	private static String key;
+	@Value("${offer.guard.offer18.aid}")
+	private static String aid;
+	@Value("${offer.guard.offer18.mid}")
+	private static String mid;
+	@Value("${offer.guard.offer18.android.device.key}")
+	private static String ANDROID_DEVICE_KEY;
+	@Value("${offer.guard.offer18.ios.device.key}")
+	private static String IOS_DEVICE_KEY;
+
 	private static String VENDOR_URL = "https://api.offer18.com/api/af/offers?mid={mid}&aid={aid}&key={key}";
-	private static String ANDROID_DEVICE_KEY = "c6aee72f-72d8-4a71-ad7a-742acfd35a60";
-	private static String IOS_DEVICE_KEY = "97F0C91E-946E-449A-B722-BCE6BF5451A9";
 	private static OfferRepository offerService;
 	private static RedirectUrlRepository redirectUrlService;
 
@@ -43,7 +50,7 @@ public class Offer18Vendor {
 		this.redirectUrlService = redirectUrlRepository;
 	}
 
-//	@Scheduled(cron = "0 */1 * ? * *")
+	@Scheduled(cron = "${offer.guard.offer18.job.cron}")
 	public void startOffer18Job() {
 		log.info("Execution of offer 18 job started");
 		Offer18VendorModel offer18VendorModel = new Offer18VendorModel(null,null,null,"1","1",null);

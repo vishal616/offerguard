@@ -8,6 +8,7 @@ import com.twentyone.offerguard.repositories.OfferRepository;
 import com.twentyone.offerguard.repositories.RedirectUrlRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
 import org.springframework.http.converter.FormHttpMessageConverter;
@@ -35,8 +36,10 @@ public class MoBrandVendor {
 	@Autowired
 	private RedirectUrlRepository redirectUrlRepository;
 
-	private static String token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJNbzRJZTRXcVFfLWliUGdmcW5GYUxBIiwiaWF0IjoxNjI5NzI5MDkwLCJqdGkiOiIzOUswaVNsRDZ2Q1V1MnFZRVFrRnp3In0.L8oxEDtbzebbuM6l3dMI-BkCQKGNWVGMsWh_jYiJaE0";
-	private static String USER_ID = "Mo4Ie4WqQ_-ibPgfqnFaLA";
+	@Value("${offer.guard.mobrand.token}")
+	private static String token;
+	@Value("${offer.guard.mobrand.userid}")
+	private static String USER_ID;
 
 	private static OfferRepository offerService;
 	private static RedirectUrlRepository redirectUrlService;
@@ -51,7 +54,7 @@ public class MoBrandVendor {
 		httpHeaders = buildHeaders();
 	}
 
-//	@Scheduled(cron = "0 */1 * ? * *")
+	@Scheduled(cron = "${offer.guard.mobrand.job.cron}")
 	public static void startMoBrandJob() {
 		log.info("Execution of mo brand affiliate link check job started");
 		getAffiliateStatusForOffers();
