@@ -115,7 +115,12 @@ public class Offer18Vendor {
 	private static String buildUrl(Offer18VendorModel offer18VendorModel) {
 		String newUrl = VENDOR_URL;
 		log.info("building url with vendor url as :: {}", newUrl);
-		newUrl = newUrl.replace("{mid}", mid).replace("{aid}", aid).replace("{key}", key);
+		log.info("variables mid {} aid {} key {} ", mid,aid,key);
+		try {
+			newUrl = newUrl.replace("{mid}", mid).replace("{aid}", aid).replace("{key}", key);
+		} catch (Exception e) {
+			log.error("",e);
+		}
 
 		if (offer18VendorModel.getAuthorized() != null ) {
 			newUrl = newUrl + "&authorized=" + offer18VendorModel.getAuthorized();

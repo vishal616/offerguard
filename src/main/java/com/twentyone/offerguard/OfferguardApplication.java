@@ -1,6 +1,8 @@
 package com.twentyone.offerguard;
 
 import com.twentyone.offerguard.config.Heroku;
+import com.twentyone.offerguard.models.Offer18VendorModel;
+import com.twentyone.offerguard.offerVendors.Offer18Vendor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +15,9 @@ public class OfferguardApplication {
 	public static void main(String[] args) {
 
 		SpringApplication.run(OfferguardApplication.class, args);
+
+		Offer18VendorModel offer18VendorModel = new Offer18VendorModel(null,null,null,"1","1",null);
+		Offer18Vendor.getOffers(offer18VendorModel);
 
 	}
 
