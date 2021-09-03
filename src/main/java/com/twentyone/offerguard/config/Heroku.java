@@ -13,8 +13,6 @@ public class Heroku {
 		RestTemplate restTemplate = new RestTemplate();
 		try {
 			restTemplate.getForObject("http://offer-guard.herokuapp.com", Object.class);
-		} catch (Exception e) {
-			log.info("Heroku not idle execution");
-		}
+		} catch (Exception e) {}
 	}
 }
