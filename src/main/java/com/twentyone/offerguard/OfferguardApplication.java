@@ -16,9 +16,6 @@ public class OfferguardApplication {
 
 		SpringApplication.run(OfferguardApplication.class, args);
 
-		Offer18VendorModel offer18VendorModel = new Offer18VendorModel(null,null,null,"1","1",null);
-		Offer18Vendor.getOffers(offer18VendorModel);
-
 	}
 
 	@Bean

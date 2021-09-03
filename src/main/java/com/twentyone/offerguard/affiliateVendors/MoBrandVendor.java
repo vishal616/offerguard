@@ -36,10 +36,18 @@ public class MoBrandVendor {
 	@Autowired
 	private RedirectUrlRepository redirectUrlRepository;
 
-	@Value("${offer.guard.mobrand.token}")
 	private static String token;
-	@Value("${offer.guard.mobrand.userid}")
 	private static String USER_ID;
+
+	@Value("${offer.guard.mobrand.token}")
+	public void setToken(String apiToken) {
+		token = apiToken;
+	}
+
+	@Value("${offer.guard.mobrand.userid}")
+	public void setUserId(String id) {
+		USER_ID = id;
+	}
 
 	private static OfferRepository offerService;
 	private static RedirectUrlRepository redirectUrlService;

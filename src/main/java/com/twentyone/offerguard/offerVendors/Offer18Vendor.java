@@ -29,20 +29,37 @@ public class Offer18Vendor {
 	@Autowired
 	private RedirectUrlRepository redirectUrlRepository;
 
-	@Value("${offer.guard.offer18.key}")
 	private static String key;
-	@Value("${offer.guard.offer18.aid}")
 	private static String aid;
-	@Value("${offer.guard.offer18.mid}")
 	private static String mid;
-	@Value("${offer.guard.offer18.android.device.key}")
 	private static String ANDROID_DEVICE_KEY;
-	@Value("${offer.guard.offer18.ios.device.key}")
 	private static String IOS_DEVICE_KEY;
-
 	private static String VENDOR_URL = "https://api.offer18.com/api/af/offers?mid={mid}&aid={aid}&key={key}";
 	private static OfferRepository offerService;
 	private static RedirectUrlRepository redirectUrlService;
+
+	@Value("${offer.guard.offer18.key}")
+	public void setKey(String apiKey) {
+		key = apiKey;
+	}
+
+	@Value("${offer.guard.offer18.aid}")
+	public void setAid(String apiAid) {
+		aid = apiAid;
+	}
+	@Value("${offer.guard.offer18.mid}")
+	public void setMid(String apiMid) {
+		mid = apiMid;
+	}
+	@Value("${offer.guard.offer18.android.device.key}")
+	public void setAndroidDeviceKey(String androidDeviceKey) {
+		ANDROID_DEVICE_KEY = androidDeviceKey;
+	}
+
+	@Value("${offer.guard.offer18.ios.device.key}")
+	public void setIosDeviceKey(String iosDeviceKey) {
+		IOS_DEVICE_KEY = iosDeviceKey;
+	}
 
 	@PostConstruct
 	public void init() {
@@ -115,12 +132,7 @@ public class Offer18Vendor {
 	private static String buildUrl(Offer18VendorModel offer18VendorModel) {
 		String newUrl = VENDOR_URL;
 		log.info("building url with vendor url as :: {}", newUrl);
-		log.info("variables mid {} aid {} key {} ", mid,aid,key);
-		try {
-			newUrl = newUrl.replace("{mid}", mid).replace("{aid}", aid).replace("{key}", key);
-		} catch (Exception e) {
-			log.error("",e);
-		}
+		newUrl = newUrl.replace("{mid}", mid).replace("{aid}", aid).replace("{key}", key);
 
 		if (offer18VendorModel.getAuthorized() != null ) {
 			newUrl = newUrl + "&authorized=" + offer18VendorModel.getAuthorized();
