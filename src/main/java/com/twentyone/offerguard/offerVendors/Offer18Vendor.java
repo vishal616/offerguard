@@ -3,8 +3,11 @@ package com.twentyone.offerguard.offerVendors;
 import com.twentyone.offerguard.models.Offer;
 import com.twentyone.offerguard.models.Offer18VendorModel;
 import com.twentyone.offerguard.models.Offer18Response;
+import com.twentyone.offerguard.models.Stats;
 import com.twentyone.offerguard.repositories.OfferRepository;
 import com.twentyone.offerguard.repositories.RedirectUrlRepository;
+import com.twentyone.offerguard.repositories.StatsRepository;
+import com.twentyone.offerguard.services.StatsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.PostConstruct;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +33,9 @@ public class Offer18Vendor {
 	@Autowired
 	private RedirectUrlRepository redirectUrlRepository;
 
+	@Autowired
+	private StatsService statsService;
+
 	private static String key;
 	private static String aid;
 	private static String mid;
@@ -37,6 +44,7 @@ public class Offer18Vendor {
 	private static String VENDOR_URL = "https://api.offer18.com/api/af/offers?mid={mid}&aid={aid}&key={key}";
 	private static OfferRepository offerService;
 	private static RedirectUrlRepository redirectUrlService;
+	private static StatsService statsServiceForDb;
 
 	@Value("${offer.guard.offer18.key}")
 	public void setKey(String apiKey) {
@@ -65,14 +73,21 @@ public class Offer18Vendor {
 	public void init() {
 		this.offerService = offerRepository;
 		this.redirectUrlService = redirectUrlRepository;
+		this.statsServiceForDb = statsService;
 	}
 
 	@Scheduled(cron = "${offer.guard.offer18.job.cron}")
 	public void startOffer18Job() {
+		triggerOffer18Job();
+	}
+
+	public static String triggerOffer18Job() {
 		log.info("Execution of offer 18 job started");
 		Offer18VendorModel offer18VendorModel = new Offer18VendorModel(null,null,null,"1","1",null);
 		getOffers(offer18VendorModel);
 		log.info("Execution of offer 18 job finished");
+		statsServiceForDb.updateStats(new Stats("offer18", LocalDateTime.now().toString()));
+		return "Execution of offer 18 job finished";
 	}
 
 	public static List<Offer> getOffers(Offer18VendorModel offer18VendorModel) {

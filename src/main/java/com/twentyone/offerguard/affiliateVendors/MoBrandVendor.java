@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.twentyone.offerguard.models.MoBrandResponse;
 import com.twentyone.offerguard.models.Offer;
 import com.twentyone.offerguard.models.RedirectUrl;
+import com.twentyone.offerguard.models.Stats;
 import com.twentyone.offerguard.repositories.OfferRepository;
 import com.twentyone.offerguard.repositories.RedirectUrlRepository;
+import com.twentyone.offerguard.services.StatsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +24,7 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,6 +38,9 @@ public class MoBrandVendor {
 
 	@Autowired
 	private RedirectUrlRepository redirectUrlRepository;
+
+	@Autowired
+	private StatsService statsService;
 
 	private static String token;
 	private static String USER_ID;
@@ -53,20 +59,28 @@ public class MoBrandVendor {
 	private static RedirectUrlRepository redirectUrlService;
 	private static RestTemplate restTemplate;
 	private static HttpHeaders httpHeaders;
+	private static StatsService statsServiceForDb;
 
 	@PostConstruct
 	public void init() {
 		this.offerService = offerRepository;
 		this.redirectUrlService = redirectUrlRepository;
+		this.statsServiceForDb = statsService;
 		restTemplate = buildRestTemplate();
 		httpHeaders = buildHeaders();
 	}
 
 	@Scheduled(cron = "${offer.guard.mobrand.job.cron}")
-	public static void startMoBrandJob() {
+	public void startMoBrandJob() {
+		getAffiliateStatusForOffers();
+	}
+
+	public static String triggerMobBrandJob() {
 		log.info("Execution of mo brand affiliate link check job started");
 		getAffiliateStatusForOffers();
 		log.info("Execution of mo brand affiliate link check job finished");
+		statsServiceForDb.updateStats(new Stats("mobrand", LocalDateTime.now().toString()));
+		return "Execution of mo brand affiliate link check job finished";
 	}
 
 	public static void getAffiliateStatusForOffers() {
@@ -91,7 +105,7 @@ public class MoBrandVendor {
 		}));
 	}
 
-	private static void callMoBrand(Offer offer) throws RestClientException, SQLException, StringIndexOutOfBoundsException {
+	public static void callMoBrand(Offer offer) throws RestClientException, SQLException, StringIndexOutOfBoundsException {
 		log.info("calling mo brand api for offer:: {}", offer.getName());
 
 		MultiValueMap<String, String> requestBody = null;
