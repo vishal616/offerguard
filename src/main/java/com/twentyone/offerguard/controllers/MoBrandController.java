@@ -1,10 +1,8 @@
 package com.twentyone.offerguard.controllers;
 
+import com.twentyone.offerguard.affiliateVendors.MoBrandVendor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -20,6 +18,11 @@ public class MoBrandController {
 		response.forEach((res)->{
 			log.info(res.toString());
 		});
+	}
 
+	@GetMapping("/job")
+	public String triggerMoBrandJob() {
+		log.info("trigger mo brand job rest api requested");
+		return MoBrandVendor.triggerMobBrandJob();
 	}
 }

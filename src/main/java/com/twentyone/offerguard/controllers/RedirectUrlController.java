@@ -1,6 +1,5 @@
 package com.twentyone.offerguard.controllers;
 
-import com.twentyone.offerguard.affiliateVendors.MoBrandVendor;
 import com.twentyone.offerguard.models.RedirectUrl;
 import com.twentyone.offerguard.repositories.RedirectUrlRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -32,9 +31,4 @@ public class RedirectUrlController {
 		return redirectUrlRepository.findByOfferId(id);
 	}
 
-	@GetMapping("/mobrand/job")
-	public String triggerMoBrandJob() {
-		log.info("trigger offer 18 job rest api requested");
-		return MoBrandVendor.triggerMobBrandJob();
-	}
 }
