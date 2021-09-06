@@ -120,24 +120,46 @@ public class MoBrandVendor {
 
 		try {
 			log.info("waiting for the api response");
-			response = restTemplate.exchange("https://api.offertest.net/offertest", HttpMethod.POST, requestEntity, MoBrandResponse.class);
+			response = restTemplate.exchange("https://api.offertest.net/offertest?async=true", HttpMethod.POST, requestEntity, MoBrandResponse.class);
 			log.info("response code:: {}", response.getStatusCode());
 		} catch (RestClientException e) {
 			throw new RestClientException("api call failed for mo brand");
 		}
 
-		MoBrandResponse moBrandResponse = response.getBody();
+//		MoBrandResponse moBrandResponse = response.getBody();
+//
+//		offer.setRedirects(moBrandResponse.getRedirects());
+//
+//		String bundleIdMatch = moBrandResponse.getBundleIdMatch();
+//		if(bundleIdMatch.equalsIgnoreCase("true")) {
+//			offer.setAffiliateStatus("SUCCESS");
+//		} else {
+//			offer.setAffiliateStatus("FAILED");
+//		}
+//
+//		List<RedirectUrl> redirectUrlList = moBrandResponse.getUrls().stream().map((moBrandUrl -> new RedirectUrl(offer.getId(), moBrandUrl.getUrl()))).collect(Collectors.toList());
+//
+//		log.info("offer status for {} is {}", offer.getName(), offer.getAffiliateStatus());
+//
+//		try {
+//			updateOfferStatus(offer);
+//			addRedirectUrls(redirectUrlList);
+//		} catch (SQLException e) {
+//			throw new SQLException(e);
+//		}
 
-		offer.setRedirects(moBrandResponse.getRedirects());
+	}
 
+	public static void saveMoBrandOfferResult(MoBrandResponse moBrandResponse, String offerId) {
 		String bundleIdMatch = moBrandResponse.getBundleIdMatch();
+		Offer offer = offerService.getById(offerId);
 		if(bundleIdMatch.equalsIgnoreCase("true")) {
 			offer.setAffiliateStatus("SUCCESS");
 		} else {
 			offer.setAffiliateStatus("FAILED");
 		}
 
-		List<RedirectUrl> redirectUrlList = moBrandResponse.getUrls().stream().map((moBrandUrl -> new RedirectUrl(offer.getId(), moBrandUrl.getUrl()))).collect(Collectors.toList());
+		List<RedirectUrl> redirectUrlList = moBrandResponse.getUrls().stream().map((moBrandUrl -> new RedirectUrl(offerId, moBrandUrl.getUrl()))).collect(Collectors.toList());
 
 		log.info("offer status for {} is {}", offer.getName(), offer.getAffiliateStatus());
 
@@ -145,9 +167,8 @@ public class MoBrandVendor {
 			updateOfferStatus(offer);
 			addRedirectUrls(redirectUrlList);
 		} catch (SQLException e) {
-			throw new SQLException(e);
+			log.error("Error in updating the offer:: {}", e);
 		}
-
 	}
 
 	private static void updateOfferStatus(Offer offer) throws SQLException {
@@ -194,11 +215,16 @@ public class MoBrandVendor {
 			requestBody.add("url", offer.getClickUrl());
 			requestBody.add("platform", offer.getOsAllowed());
 			requestBody.add("expectedBundleId", getBundleId(offer.getPreviewUrl(), offer.getOsAllowed()));
+			requestBody.add("callback", getCallBackUrl(offer.getId()));
 			log.info("payload built successful");
 		} catch (StringIndexOutOfBoundsException e) {
 			throw new StringIndexOutOfBoundsException();
 		}
 		return requestBody;
+	}
+
+	private static String getCallBackUrl(String offerId) {
+		return "https://offer-guard.herokuapp.com/api/mobrand/" + offerId +"/result";
 	}
 
 	private static String getBundleId(String previewUrl, String os) throws StringIndexOutOfBoundsException {

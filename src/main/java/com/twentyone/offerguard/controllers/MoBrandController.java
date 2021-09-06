@@ -13,8 +13,9 @@ public class MoBrandController {
 
 	@PostMapping("/{offerId}/result")
 	public void receiveMoBrandAsyncResponse(@RequestBody MoBrandResponse moBrandResponse, @PathVariable String offerId) {
-		log.info("receiving response from mobrand async rest api");
-		log.info("response like {} {} for offerid :: {}", moBrandResponse,moBrandResponse.toString(), offerId);
+		log.info("receiving response from mobrand async rest api for offer Id :: {} with bundle Id match as:: {}", offerId, moBrandResponse.getBundleIdMatch());
+		MoBrandVendor.saveMoBrandOfferResult(moBrandResponse, offerId);
+		log.info("offer successfully integrated into the database");
 	}
 
 	@GetMapping("/job")
