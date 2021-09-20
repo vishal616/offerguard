@@ -1,6 +1,7 @@
 package com.twentyone.offerguard;
 
 import com.twentyone.offerguard.config.Heroku;
+import com.twentyone.offerguard.config.SendGridConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +14,7 @@ public class OfferguardApplication {
 	public static void main(String[] args) {
 
 		SpringApplication.run(OfferguardApplication.class, args);
+		SendGridConfig.sendEmail();
 
 	}
 

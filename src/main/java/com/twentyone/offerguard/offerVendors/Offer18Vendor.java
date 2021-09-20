@@ -76,7 +76,7 @@ public class Offer18Vendor {
 		this.statsServiceForDb = statsService;
 	}
 
-	@Scheduled(cron = "${offer.guard.offer18.job.cron}")
+//	@Scheduled(cron = "${offer.guard.offer18.job.cron}")
 	public void startOffer18Job() {
 		triggerOffer18Job();
 	}

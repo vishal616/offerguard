@@ -70,7 +70,7 @@ public class MoBrandVendor {
 		httpHeaders = buildHeaders();
 	}
 
-	@Scheduled(cron = "${offer.guard.mobrand.job.cron}")
+//	@Scheduled(cron = "${offer.guard.mobrand.job.cron}")
 	public void startMoBrandJob() {
 		getAffiliateStatusForOffers();
 	}
