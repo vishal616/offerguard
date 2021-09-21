@@ -14,7 +14,11 @@ public class OfferguardApplication {
 	public static void main(String[] args) {
 
 		SpringApplication.run(OfferguardApplication.class, args);
-		SendGridConfig.sendEmail();
+		try {
+			SendGridConfig.sendEmail(null, null);
+		} catch (Exception e) {
+
+		}
 
 	}
 
