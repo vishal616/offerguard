@@ -39,7 +39,7 @@ public class EmailAlert {
 	public static void sendEmailAlerts() {
 		log.info("Execution of email alerts job started");
 		log.info("Getting all offers with status failed or pending");
-		List<Offer> offerList = offerService.findAll();
+		List<Offer> offerList = offerService.findByAffiliateStatus("FAILED");
 		log.info("offers pulled successfully");
 
 		log.info("total offers: {}", offerList.size());
