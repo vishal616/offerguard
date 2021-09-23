@@ -1,12 +1,13 @@
 package com.twentyone.offerguard.offerVendors;
 
+import com.sendgrid.helpers.mail.objects.Content;
+import com.twentyone.offerguard.config.SendGridConfig;
 import com.twentyone.offerguard.models.Offer;
 import com.twentyone.offerguard.models.Offer18VendorModel;
 import com.twentyone.offerguard.models.Offer18Response;
 import com.twentyone.offerguard.models.Stats;
 import com.twentyone.offerguard.repositories.OfferRepository;
 import com.twentyone.offerguard.repositories.RedirectUrlRepository;
-import com.twentyone.offerguard.repositories.StatsRepository;
 import com.twentyone.offerguard.services.StatsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -114,11 +116,13 @@ public class Offer18Vendor {
 				offer.setClickUrl(offer.getClickUrl() + osAppender);
 			}));
 			updateOffers(offers);
+			sendEmail("Offer 18 job success", "Offers are updated in the database");
 		} catch (HttpServerErrorException e) {
 			log.error("api call failed:: {}", e);
-		}
-		catch (SQLException e) {
+			sendEmail("Offer 18 job failed", "It failed because of api call failed");
+		} catch (SQLException e) {
 			log.error("database offer table update failed:: {}", e);
+			sendEmail("Offer 18 job failed", "It failed because of database update failed");
 		}
 		return offers;
 	}
@@ -172,5 +176,15 @@ public class Offer18Vendor {
 		log.info("url built successfully:: {}", newUrl);
 
 		return newUrl;
+	}
+
+	private static void sendEmail(String subject, String message) {
+		try {
+			log.info("sending email for offer 18 job");
+			SendGridConfig.sendEmail(subject, new Content("text/plain", message));
+			log.info("email sent successfully for offer 18 job");
+		} catch (IOException e) {
+			log.error("email sending process failed for offer 18 job update", e);
+		}
 	}
 }
