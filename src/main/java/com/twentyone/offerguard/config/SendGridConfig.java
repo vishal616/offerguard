@@ -49,8 +49,6 @@ public class SendGridConfig {
 
 	private static Mail buildMailPayload(String subject, Content content) {
 		log.info("Building email payload");
-		subject = "Offer Guard Updates";
-		content = new Content("text/plain", "and easy to do anywhere, even with Java");
 		Mail mail = new Mail();
 		Personalization personalization = new Personalization();
 		emailRecipients.forEach(email-> {

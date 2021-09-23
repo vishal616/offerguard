@@ -8,12 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClientException;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,7 +28,7 @@ public class EmailAlert {
 		this.offerService = offerRepository;
 	}
 
-//	@Scheduled(cron = "${offer.guard.emailalert.job.cron}")
+	@Scheduled(cron = "${offer.guard.emailalert.job.cron}")
 	public void startEmailAlertJob() {
 		sendEmailAlerts();
 	}
@@ -45,13 +42,14 @@ public class EmailAlert {
 		log.info("total offers: {}", offerList.size());
 
 		List<String> offerIdList =  offerList.stream()
-				.filter(offer -> !offer.getAffiliateStatus().equalsIgnoreCase("SUCCESS"))
 				.map(offer -> offer.getId())
 				.collect(Collectors.toList());
 
+		String message = offerIdList.size() > 0 ? offerIdList.toString() : "No offers with failed status found in database, everything looks good :)";
+
 		try {
 			log.info("Sending email alerts");
-			SendGridConfig.sendEmail(null, new Content("List", offerIdList.toString()));
+			SendGridConfig.sendEmail("OfferGuard Update For Failed offers", new Content("text/plain", message));
 		} catch (IOException e) {
 			log.error("Error in sending email alert", e);
 		}
